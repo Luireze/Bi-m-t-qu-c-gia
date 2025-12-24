@@ -18,6 +18,11 @@ canvas{display:block}
 <canvas id="c"></canvas>
 <div id="hint">Chạm vào ánh sáng ✨</div>
 
+<!-- 🎶 NHẠC NOEL -->
+<audio id="bgm" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
 <script>
 const c=document.getElementById("c"),ctx=c.getContext("2d");
 resize();onresize=resize;
@@ -26,8 +31,9 @@ const C=()=>({x:c.width/2,y:c.height/2});
 
 let stage=0,leaf=0,trunk=0,openGift=false;
 let snow=[],decor=[],snowmanAlpha=0;
-let santaX=-500,santaY;
+let santaX=-500;
 let letterAnim=0;
+let musicPlayed=false;
 
 for(let i=0;i<220;i++)
  snow.push({x:Math.random()*c.width,y:Math.random()*c.height,r:1+Math.random()*2,s:.4+Math.random()*.6});
@@ -35,9 +41,15 @@ for(let i=0;i<220;i++)
 /* ===== CLICK ===== */
 c.onclick=e=>{
  if(stage===0) stage=1;
+
  let g={x:C().x,y:C().y+300};
- if(stage>=2 && Math.abs(e.clientX-g.x)<65 && Math.abs(e.clientY-g.y)<65)
+ if(stage>=2 && Math.abs(e.clientX-g.x)<65 && Math.abs(e.clientY-g.y)<65){
   openGift=true;
+  if(!musicPlayed){
+   document.getElementById("bgm").play();
+   musicPlayed=true;
+  }
+ }
 };
 
 function glow(x,y,r,col,a=1){
@@ -127,29 +139,21 @@ function drawTopStar(){
 function drawSanta(){
  santaX+=2.2;
  if(santaX>c.width+300) return;
- santaY=C().y-360;
 
- ctx.save();
- ctx.translate(santaX,santaY);
+ let y=C().y-360;
+ ctx.save();ctx.translate(santaX,y);
 
  ctx.strokeStyle="#bbb";
- ctx.beginPath();
- ctx.moveTo(-30,15);
- ctx.lineTo(-160,10);
- ctx.stroke();
+ ctx.beginPath();ctx.moveTo(-30,15);ctx.lineTo(-160,10);ctx.stroke();
 
  ctx.fillStyle="#b11226";
  ctx.fillRect(0,20,70,18);
  ctx.strokeStyle="#ffd700";
- ctx.beginPath();
- ctx.arc(8,40,22,Math.PI,Math.PI*1.8);
- ctx.stroke();
+ ctx.beginPath();ctx.arc(8,40,22,Math.PI,Math.PI*1.8);ctx.stroke();
 
  glow(35,5,16,"#c1121f");
- ctx.fillStyle="black";
- ctx.fillRect(20,10,30,6);
- ctx.fillStyle="#ffd700";
- ctx.fillRect(32,10,6,6);
+ ctx.fillStyle="black";ctx.fillRect(20,10,30,6);
+ ctx.fillStyle="#ffd700";ctx.fillRect(32,10,6,6);
 
  glow(35,-20,12,"#ffe0bd");
  glow(35,-12,14,"white");
@@ -194,28 +198,12 @@ function drawGift(){
  glow(p.x,p.y-60,7,"#ffd700");
 }
 
-/* ===== SNOWMAN ===== */
-function snowman(x,y){
- ctx.globalAlpha=snowmanAlpha;
- glow(x,y-20,18,"#f5f5f5");
- glow(x,y-48,14,"#f5f5f5");
- glow(x-4,y-50,2,"black");
- glow(x+4,y-50,2,"black");
- glow(x,y-46,3,"orange");
- ctx.strokeStyle="#e63946";
- ctx.lineWidth=4;
- ctx.beginPath();
- ctx.moveTo(x-12,y-38);
- ctx.lineTo(x+12,y-38);
- ctx.stroke();
- ctx.globalAlpha=1;
-}
-
-/* ===== LETTER (PERFECT) ===== */
+/* ===== LETTER ===== */
 function letter(){
  letterAnim=Math.min(letterAnim+.02,1);
  const scale=.85+.15*letterAnim;
  const w=560,h=240;
+
  ctx.save();
  ctx.translate(C().x,C().y);
  ctx.scale(scale,scale);
@@ -255,12 +243,6 @@ function loop(){
   drawTrunk();
   drawTopStar();
   drawGift();
- }
-
- if(stage>=2){
-  snowmanAlpha=Math.min(snowmanAlpha+.015,1);
-  snowman(C().x-190,C().y+280);
-  snowman(C().x+190,C().y+280);
  }
 
  if(openGift) letter();
